@@ -16,4 +16,5 @@ list of features i am going to hopefully add:
 -Calcuate transpose
 -and maybe more
 
-If you want to use this, go ahead, im not a good coder, so things may break, but thanks for stopping by anyways!
+additional reported issues may or may not get fixed as im pretty busy and this is for my own learning, but
+If you still want to use this, go ahead, im not a good coder, so things may break, but thanks for stopping by anyways!
