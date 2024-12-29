@@ -1,5 +1,5 @@
 #include "matrix2d.h"
-
+#include <stdio.h>
 //g++ -fPIC -shared -o matrix.so matrix2d.cpp c_wrapper.cpp
 
 extern "C"{
@@ -13,27 +13,58 @@ extern "C"{
         delete pt;
     }    
 
+    Matrix2D* matrix2d_copy(Matrix2D* pt){ 
+        Matrix2D* temp_pt; //matrix pt"
+        Matrix2D temp(*pt); //makes a new copied matrix object using the one passed in 
+        
+        
+        temp_pt = &temp;
+        
+        return temp_pt;
+    }
+
     float matrix2d_get_element(Matrix2D* pt, int x, int y){
         return pt->get_element(x,y);
     }
 
+    void matrix2d_set_element(Matrix2D* pt, int x, int y, float value){
+        pt->set_element_value(x,y,value);
+    }
+
+
+    int matrix2d_get_row_size(Matrix2D* pt){
+        return pt->get_row_size();
+    }
+    int matrix2d_get_column_size(Matrix2D* pt){
+        return pt->get_column_size();
+    }
+    /*
     Matrix2D* matrix2d_addition(Matrix2D* pt, Matrix2D* pt2){ //!A LOT OF THE BELLOW MAY BREAK WHEN BINDED TOGETHER (THE THINGS THAT RETRUN THE ADDRESS OF STACK MEMORY WHICH THE THINGY TAKES ISSUE WITH)
         Matrix2D pt_added = *pt + *pt2;
-        return &(pt_added); //dereferences to the matrix value to add then, then makes it a pointer to return 
-    }
 
-    Matrix2D* matrix2d_subtraction(Matrix2D* pt, Matrix2D* pt2){
-        Matrix2D pt_subbed = *pt - *pt2;
-        return &(pt_subbed); //dereferences to the matrix value to add then, then makes it a pointer to return 
+        Matrix2D* pt_final = &(pt_added);
+        printf("testing");
+        printf("%d",(pt_final->get_row_size()));
+        printf("%d",(pt_final->get_column_size()));
+        return pt_final; 
     }
-
-    Matrix2D* matrix2d_matrix_to_matrix_mult(Matrix2D* pt, Matrix2D* pt2){
-        Matrix2D pt_multed = *pt * *pt2;
-        return &(pt_multed); //dereferences to the matrix value to add then, then makes it a pointer to return 
+    */
+    void matrix2d_add(Matrix2D* pt, Matrix2D* pt2){
+        pt->addMatrix(*pt2);
     }
-    Matrix2D* matrix2d_matrix_scaled(Matrix2D* pt,float scalar){
-        Matrix2D pt_scaled = *pt * scalar;
-        return &(pt_scaled); //dereferences to the matrix value to add then, then makes it a pointer to return 
+    void matrix2d_subtract(Matrix2D* pt, Matrix2D* pt2){
+        pt->subtract_Matrix(*pt2);
     }
-
+    void multiply_matrix_with_matrix(Matrix2D* pt, Matrix2D* pt2){
+        pt->multiply_matrix_with_matrix(*pt2);
+    }
+    void multiply_matrix_with_scalar(Matrix2D* pt, float scalar){
+        pt->multiply_matrix_with_scaler(scalar);
+    }
+    float* vector_matrix_dot_prod(Matrix2D* pt, float* vec, int vec_len){
+        return pt->vector_matrix_dot_product(vec,vec_len);
+    }
+    Matrix2D* get_transpose(Matrix2D* pt){
+        return pt->get_Transpose();
+    }
 }

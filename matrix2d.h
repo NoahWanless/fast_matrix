@@ -11,14 +11,21 @@ class Matrix2D{
     public:
         
         Matrix2D(int rows, int columns, float seed_Num = 0);
+        Matrix2D(Matrix2D& otherMatrix);
+        Matrix2D* get_Transpose();
         
         ~Matrix2D();
 
-        Matrix2D operator+(Matrix2D& otherMatrix);
-        Matrix2D operator-(Matrix2D& otherMatrix);
-        Matrix2D operator*(Matrix2D& otherMatrix);
+        void addMatrix(Matrix2D& otherMatrix);
+        void subtract_Matrix(Matrix2D& otherMatrix);
+        void multiply_matrix_with_matrix(Matrix2D& otherMatrix);
+        float** copyMatrixPt();
+        void multiply_matrix_with_scaler(float scaler);
+        
+        float* vector_matrix_dot_product(float* vec, int length);
+
         float* operator*(float *array); 
-        Matrix2D operator*(float scalar);
+        
         
         
 
@@ -31,11 +38,6 @@ class Matrix2D{
 
         void set_element_value(int x, int y, float value);
 
-        //int[] get_shape();
-
-        //float[] get_column(int index);
-
-        //float[] get_row(int index);
 
 
 };
