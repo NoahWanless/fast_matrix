@@ -1,4 +1,8 @@
 # fast_matrix
+
+For the momnent this project is on hold for the forseeable future
+
+
 A matrix module written in c++ with a python wrapper 
 
 
@@ -6,14 +10,13 @@ This is meant to be a project for my benefit so i can A, learn how to use ctypes
 (although i dont this will be very fast or efficient)
 
 list of features i am going to hopefully add:
--Matrix addition/subtraction
--Matrix multiplication
--Matrix vector product
--Matrix scalar product
--Determinent calcuator (most likely wont happen but we'll see)
+-Matrix addition/subtraction Yes
+-Matrix multiplication Not yet
+-Matrix vector product Yes
+-Matrix scalar product YEs
 -A good python wrapper for everthing
--Ability to increase dimensions of the matrix 
--Calcuate transpose
+-Ability to increase dimensions of the matrix  Not yet
+-Calcuate transpose Yes
 -and maybe more
 
 additional reported issues may or may not get fixed as im pretty busy and this is for my own learning, but
