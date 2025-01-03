@@ -19,9 +19,7 @@ Matrix2D::Matrix2D(int rows, int columns, float seed_Num){
     }
     num_rows = rows;
     num_columns = columns;
-    for(int j = 0; j < columns; j++){ //fills array with other arrays on heap
-        matrix[j] = new float[rows];
-    }   
+     
     for(int i = 0; i < rows; i++){ 
         for(int j = 0; j < columns; j++){ 
              matrix[i][j] = seed_Num; //seeds array
@@ -30,10 +28,8 @@ Matrix2D::Matrix2D(int rows, int columns, float seed_Num){
     }
 }
 
-Matrix2D::Matrix2D(Matrix2D& otherMatrix){ //this is the copy constructor
-    matrix = otherMatrix.copyMatrixPt();
-    num_rows = otherMatrix.get_row_size();
-    num_columns = otherMatrix.get_column_size();
+Matrix2D::Matrix2D(const Matrix2D& otherMatrix){ //this is the copy constructor
+    matrix = otherMatrix.matrix;
 }
 
 Matrix2D::~Matrix2D(){
@@ -43,7 +39,7 @@ Matrix2D::~Matrix2D(){
     delete matrix;
 }
 
-Matrix2D* Matrix2D::get_Transpose(){
+Matrix2D* Matrix2D::get_Transpose(){ //this function isnt used in the python wrapper but thought i keep it anyways
     //Here when making the empty array, it flips the dimionsions, meaning the new matrix's number of rows is the old matrixs number of columns
     Matrix2D new_mat(num_columns,num_rows,0);
     Matrix2D* pt_to_matrix = &(new_mat);
@@ -54,7 +50,6 @@ Matrix2D* Matrix2D::get_Transpose(){
             pt_to_matrix->set_element_value(j,i,value);
         }
     } 
-    std::cout << "Here is the matrixs size: " << pt_to_matrix->get_row_size() << " by " << pt_to_matrix->get_column_size() << std::endl;
     return pt_to_matrix;
 }
 
@@ -76,7 +71,7 @@ float** Matrix2D::copyMatrixPt(){ //returns copy of matrix pt on heap
 
 }
 
-void Matrix2D::addMatrix(Matrix2D& otherMatrix){
+void Matrix2D::addMatrix(Matrix2D& otherMatrix){ //this function applies the operation to itself, not returing a new object
     int otherRowSize = otherMatrix.get_row_size();
     int otherColumnSize = otherMatrix.get_column_size();
     if(num_rows != otherRowSize || num_columns != otherColumnSize){//check sizes
@@ -99,7 +94,7 @@ void Matrix2D::addMatrix(Matrix2D& otherMatrix){
 
 }
 
-void Matrix2D::subtract_Matrix(Matrix2D& otherMatrix){
+void Matrix2D::subtract_Matrix(Matrix2D& otherMatrix){//this function applies the operation to itself, not returing a new object
     int otherRowSize = otherMatrix.get_row_size();
     int otherColumnSize = otherMatrix.get_column_size();
     if(num_rows != otherRowSize || num_columns != otherColumnSize){//check sizes
@@ -113,33 +108,39 @@ void Matrix2D::subtract_Matrix(Matrix2D& otherMatrix){
     }
     for (int i = 0; i < this->num_rows; i++){
         for (int j = 0; j < this->num_columns; j++){
-            float value = this->matrix[i][j] - otherMatrix.matrix[i][j];
+            float value = this->matrix[i][j] - otherMatrix.matrix[i][j]; 
             matrix[i][j] = value;
         }
     }
 }
 
-void Matrix2D::multiply_matrix_with_matrix(Matrix2D& otherMatrix){ //applies to itself
-    if(num_columns != otherMatrix.get_row_size()){ 
+Matrix2D Matrix2D::multiply_matrix_with_matrix(Matrix2D& otherMatrix){ //applies to itself
+    if(num_columns != otherMatrix.get_row_size()){  //because internal dimensions of matrix product must match
         try{throw 1;}
         catch(int e){//throws error if internal sizes dont match
             std::cout << "Row size of matrix one does not match with column size of matrix 2" << std::endl;
             exit(-1);
         }
     }
+    Matrix2D temp_obj(num_rows,otherMatrix.get_row_size(),0);
 
-    for(int i = 0; i < num_rows; i++){
+    for(int i = 0; i < num_rows; i++){ //generic matrix product formula
         for(int j = 0; j < otherMatrix.get_column_size(); j++){
-            for(int k = 0; k < otherMatrix.get_row_size(); k++){
+            float sum = 0;
+            for(int k = 0; k < num_columns; k++){
                 float value = this->get_element(i,k) * otherMatrix.get_element(k,j);
-                this->set_element_value(i,j,value);
+                sum +=value;
+                
             }
+            temp_obj.set_element_value(i,j,sum);
+            //this->set_element_value(i,j,sum);
         }
     }
+    return temp_obj;
     
 }
 
-void Matrix2D::multiply_matrix_with_scaler(float scaler){
+void Matrix2D::multiply_matrix_with_scaler(float scaler){//this function applies the operation to itself, not returing a new object
     for(int i = 0; i < num_rows; i++){
         for(int j = 0; j < num_columns; j++){
             float value = this->get_element(i,j) * scaler;
@@ -148,7 +149,7 @@ void Matrix2D::multiply_matrix_with_scaler(float scaler){
     }
 }
 
-float* Matrix2D::vector_matrix_dot_product(float* vec, int length){ //!|||||--------UNTESTED, SO FURTURE ME PLEASE TEST THIS OUT---------|||||
+float* Matrix2D::vector_matrix_dot_product(float* vec, int length){ //this function applies the operation to itself but does return a new list object
     if(num_columns != length){//check sizes
         try{
             throw 1; //throws error for desired index out of range
@@ -159,10 +160,11 @@ float* Matrix2D::vector_matrix_dot_product(float* vec, int length){ //!|||||----
         }
     }
 
-    float* new_vec = new float[length]; //on heap, list of float    #!\\\\\\-----DONT KNOW IF THIS WILL NEED TO BE DELETED LATER ON, OR IF IT CAN JUST BE LEFT-----||||
-    for(int i = 0; i < num_rows; i++){
+    float* new_vec = new float[length]; //on heap, list of float    
+
+    for(int i = 0; i < num_rows; i++){ //basic matrix vector product
         float sum = 0;
-        for(int j = 0; j < num_columns; j++){
+        for(int j = 0; j < num_columns; j++){ 
             sum += this->get_element(i,j) * vec[j];
         }
         new_vec[i] = sum;
@@ -170,7 +172,15 @@ float* Matrix2D::vector_matrix_dot_product(float* vec, int length){ //!|||||----
     return new_vec;
 }
 
-
+void Matrix2D::print_matrix(){
+    for (int i = 0; i < num_rows; i++){
+        for (int j = 0; j < num_columns; j++){
+            std::cout << matrix[i][j] << " ";
+        }   
+        std::cout <<"\n";
+    }
+    
+}
 
 
 
@@ -196,42 +206,70 @@ float Matrix2D::get_element(int x, int y){
         return matrix[x][y];
     }
 }
+
 void Matrix2D::set_element_value(int x, int y, float value){
     matrix[x][y] = value;
 }
 
+void Matrix2D::set_matrix_pt_value(float** pt){
+    matrix = pt;
+}
 
 
 int main(){
     //tests
+    std::cout << "Here are the tests/demonstrations of the matrix object:" << std::endl;
+    std::cout << "||--------------|| Matrix copy: ||--------------||" << std::endl;
+    Matrix2D o2(3,3,1); 
+    o2.print_matrix();
+    //Matrix2D o3 = o2.copyMatrix();
+    //o3.print_matrix();
+
+    std::cout << "||--------------|| Matrix addition: ||--------------||" << std::endl;
     Matrix2D m1(3,3,1); //2d matri of size 3x3 with 1's in it
-
-    float list[3] = {1,1,1};
-    std::cout << "Beginning of dot product test" << std::endl;
-    float* lfinal = m1.vector_matrix_dot_product(list,3);
-    for(int i = 0; i < 3; i ++){
-        std::cout << lfinal[i] << std::endl;
-    }
-    std::cout << "end of dot product test" << std::endl;
-    Matrix2D m2(3,3,2);
-
-
-
-
-    std::cout << "beginning of test Zero" << std::endl; 
-    std::cout << "-----------------------------" << std::endl; 
-    std::cout << "Here is m1's element" << std::endl;
-    std::cout << m1.get_element(2,2) << std::endl;
-    Matrix2D m10(m1);
-    std::cout << "Here is m10's element" << std::endl;
-    std::cout << m10.get_element(2,2) << std::endl;
-    std::cout << "------------Now a change has occured-----------------" << std::endl; 
-    m1.set_element_value(2,2,7);
-    std::cout << "Here is m1's element" << std::endl;
-    std::cout << m1.get_element(2,2) << std::endl;
-    std::cout << "Here is m10's element" << std::endl;
-    std::cout << m10.get_element(2,2) << std::endl;
-    std::cout << "-----------------------------" << std::endl; 
+    Matrix2D m2(3,3,1); 
+    std::cout << "OG Matrix:" << std::endl;
+    m1.print_matrix();
+    m1.addMatrix(m2);
+    std::cout << "New Matrix:" << std::endl;
+    m1.print_matrix();
+    std::cout << "||--------------|| Matrix subtraction: ||--------------||" << std::endl;
+    Matrix2D s1(3,3,1); //2d matri of size 3x3 with 1's in it
+    Matrix2D s2(3,3,1); 
+    std::cout << "OG Matrix:" << std::endl;
+    s1.print_matrix();
+    s1.subtract_Matrix(s2);
+    std::cout << "New Matrix:" << std::endl;
+    s1.print_matrix();
+    std::cout << "||--------------|| Matrix matrix product: ||--------------||" << std::endl;
+    Matrix2D g1(2,2,1); 
+    Matrix2D g2(2,2,2); 
+    std::cout << "OG Matrix 1:" << std::endl;
+    g1.print_matrix();
+    std::cout << "OG Matrix 2:" << std::endl;
+    g2.print_matrix();
+    Matrix2D g3 = g1.multiply_matrix_with_matrix(g2);
+    std::cout << "New Matrix:" << std::endl;
+    g3.print_matrix();
+    std::cout << "||--------------|| Matrix product with scalar: ||--------------||" << std::endl;
+    Matrix2D p1(3,3,1); //2d matri of size 3x3 with 1's in it
+    int value = 2;
+    std::cout << "OG Matrix:" << std::endl;
+    p1.print_matrix();
+    p1.multiply_matrix_with_scaler(value);
+    std::cout << "New Matrix:" << std::endl;
+    p1.print_matrix();
+    std::cout << "||--------------|| Matrix product with vector ||--------------||" << std::endl;
+    Matrix2D v1(3,3,1); //2d matri of size 3x3 with 1's in it
+    float l[3] = {1,1,1};
+    std::cout << "OG Matrix:" << std::endl;
+    v1.print_matrix();
+    float* l2;
+    l2 = v1.vector_matrix_dot_product(l,3);
+    std::cout << "Output:" << std::endl;
+    std::cout << l2[0] << std::endl;
+    std::cout << l2[1] << std::endl;
+    std::cout << l2[2] << std::endl;
     
     return 0; 
 }
